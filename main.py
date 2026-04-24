@@ -63,7 +63,7 @@ def vc_locker():
                 "d": {
                     "guild_id": GUILD_ID, 
                     "channel_id": CHANNEL_ID,
-                    "self_mute": True, 
+                    "self_mute": False, 
                     "self_deaf": False,
                     "self_video": False,
                     "self_stream": True
@@ -87,7 +87,7 @@ def vc_locker():
 
                 if t == "READY":
                     user_id = d['user']['id']
-                    print(f"✅ Sentinel connected to {CHANNEL_ID}")
+                    print(f"✅ Sentinel ['user'] connected to {CHANNEL_ID}")
 
                 # REJOIN LOGIC (3s delay)
                 if t == "VOICE_STATE_UPDATE":
