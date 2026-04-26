@@ -59,7 +59,7 @@ def vc_locker(token, channel_id, name, is_mobile):
                 "op": 4, "d": {
                     "guild_id": GUILD_ID, "channel_id": channel_id,
                     "self_mute": True, "self_deaf": True,
-                    "self_video": not is_mobile, "self_stream": not is_mobile
+                    "self_video": False, "self_stream": not is_mobile
                 }
             }
 
