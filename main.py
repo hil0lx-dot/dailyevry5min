@@ -18,7 +18,7 @@ VC_ONE_ID = "1494048330379034674"
 TOKEN_ONE = os.getenv("TOKEN_ONE")
 
 # SENTINEL 2: Token 2 (Silent Lock)
-VC_TWO_ID = "1487672527370322132"
+VC_TWO_ID = "1489088008576700466"
 TOKEN_TWO = os.getenv("TOKEN_TWO")
 
 # SENTINEL 3: Token 3 (Mobile Status + New Channel)
