@@ -4,7 +4,7 @@ from flask import Flask
 # --- FLASK WEB SERVER ---
 app = Flask('')
 @app.route('/')
-def home(): return "🛰️ Dual-Sentinel Multi-VC: Active"
+def home(): return "🛰️ Triple-Sentinel Multi-VC: Active"
 
 def run_web():
     port = int(os.environ.get("PORT", 8080))
@@ -13,13 +13,17 @@ def run_web():
 # --- CONFIGURATION ---
 GUILD_ID = "777271906486976512"
 
-# SETTINGS FOR SENTINEL 1 (Token 1)
+# SENTINEL 1: Token 1 (Daily Spam + VC Lock)
 VC_ONE_ID = "1494048330379034674"
 TOKEN_ONE = os.getenv("TOKEN_ONE")
 
-# SETTINGS FOR SENTINEL 2 (Token 2)
-VC_TWO_ID = "1489088008576700466" # Change this if you want a different VC for Alt 2
+# SENTINEL 2: Token 2 (Silent Lock)
+VC_TWO_ID = "1487672527370322132"
 TOKEN_TWO = os.getenv("TOKEN_TWO")
+
+# SENTINEL 3: Token 3 (Silent Lock - New Channel)
+VC_THREE_ID = "1489292284322381956"
+TOKEN_THREE = os.getenv("TOKEN_THREE")
 
 # --- DAILY SPAMMER (Only for Token 1) ---
 def daily_spammer():
@@ -35,7 +39,7 @@ def daily_spammer():
 # --- MAIN VC LOCKER FUNCTION ---
 def vc_locker(token, channel_id, name, is_mute, is_deaf, send_video):
     if not token:
-        print(f"⚠️ {name} token missing.")
+        print(f"⚠️ {name} token missing. Skipping...")
         return
 
     while True:
@@ -53,7 +57,6 @@ def vc_locker(token, channel_id, name, is_mute, is_deaf, send_video):
                 }
             }))
 
-            # Custom Join Payload based on your settings
             join_payload = {
                 "op": 4, 
                 "d": {
@@ -99,13 +102,15 @@ def vc_locker(token, channel_id, name, is_mute, is_deaf, send_video):
 if __name__ == "__main__":
     threading.Thread(target=run_web, daemon=True).start()
     
-    # 1. Start Token 1: Joins VC_ONE, uses "Daily", Unmuted, Camera ON
+    # Sentinel 1: Daily Chat, No Mute, Video ON
     threading.Thread(target=vc_locker, args=(TOKEN_ONE, VC_ONE_ID, "Sentinel-1", False, False, True)).start()
     threading.Thread(target=daily_spammer, daemon=True).start()
     
-    # 2. Start Token 2: Joins VC_TWO, Silent, MUTED, DEAFENED, Camera OFF
-    # Change 'True, True, False' to adjust Mute, Deaf, Video
+    # Sentinel 2: Silent, Muted, Deafened, Video OFF
     threading.Thread(target=vc_locker, args=(TOKEN_TWO, VC_TWO_ID, "Sentinel-2", True, True, False)).start()
+    
+    # Sentinel 3: Silent, Muted, Deafened, Video OFF (New Channel)
+    threading.Thread(target=vc_locker, args=(TOKEN_THREE, VC_THREE_ID, "Sentinel-3", True, True, False)).start()
     
     while True: time.sleep(1)
         
