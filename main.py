@@ -3,7 +3,7 @@ from flask import Flask
 
 app = Flask('')
 @app.route('/')
-def home(): return "🛰️ Sentinel Smooth-Wavy: Active"
+def home(): return "🛰️ Sentinel Smart-Lock: Active"
 
 def run_web():
     port = int(os.environ.get("PORT", 8080))
@@ -12,28 +12,22 @@ def run_web():
 # --- CONFIGURATION ---
 GUILD_ID = "777271906486976512"
 
-# SENTINEL 1: Token 1 (Daily Spam + VC Lock)
+# Hardcoded Home Channels
 VC_ONE_ID = "1292895439531671613"
-TOKEN_ONE = os.getenv("TOKEN_ONE")
-
-# SENTINEL 2: Token 2 (Silent Lock - UPDATED CHANNEL)
 VC_TWO_ID = "1465180321124454486"
-TOKEN_TWO = os.getenv("TOKEN_TWO")
-
-# SENTINEL 3: Token 3 (Mobile Status + VC Lock)
 VC_THREE_ID = "1388555164708900955"
-TOKEN_THREE = os.getenv("TOKEN_THREE")
 
 tokens = {
-    "Sentinel-1": {"token": TOKEN_ONE, "channel": VC_ONE_ID, "mobile": False, "spam": True},
-    "Sentinel-2": {"token": TOKEN_TWO, "channel": VC_TWO_ID, "mobile": False, "spam": False},
-    "Sentinel-3": {"token": TOKEN_THREE, "channel": VC_THREE_ID, "mobile": True, "spam": False}
+    "Sentinel-1": {"token": os.getenv("TOKEN_ONE"), "channel": VC_ONE_ID, "mobile": False, "spam": True},
+    "Sentinel-2": {"token": os.getenv("TOKEN_TWO"), "channel": VC_TWO_ID, "mobile": False, "spam": False},
+    "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": False}
 }
 
 # --- DAILY SPAMMER (Only for Token 1) ---
 def daily_spammer():
-    if not TOKEN_ONE: return
-    header = {"Authorization": TOKEN_ONE.strip()}
+    token = tokens["Sentinel-1"]["token"]
+    if not token: return
+    header = {"Authorization": token.strip()}
     while True:
         try:
             requests.post(f"https://discord.com/api/v9/channels/{VC_ONE_ID}/messages",
@@ -42,7 +36,7 @@ def daily_spammer():
         except: time.sleep(10)
 
 # --- MAIN VC LOCKER FUNCTION ---
-def vc_locker(token, channel_id, name, is_mobile):
+def vc_locker(token, home_channel, name, is_mobile):
     if not token: return
 
     while True:
@@ -67,39 +61,60 @@ def vc_locker(token, channel_id, name, is_mobile):
 
             join_payload = {
                 "op": 4, "d": {
-                    "guild_id": GUILD_ID, "channel_id": channel_id,
-                    "self_mute": True, "self_deaf": True,
+                    "guild_id": GUILD_ID, "channel_id": home_channel,
+                    "self_mute": False, "self_deaf": False,
                     "self_video": False, "self_stream": not is_mobile
                 }
             }
 
             last_heartbeat = 0
             last_dice_roll = 0
+            user_id = None
             
             while True:
                 msg = ws.recv()
                 if not msg: break
                 data = json.loads(msg)
                 
-                if data.get('op') == 10:
+                op = data.get('op')
+                t = data.get('t')
+                d = data.get('d')
+
+                if op == 10:
                     ws.send(json.dumps(join_payload))
 
-                # Dice roll for "Wavy Line" (Check every 60s, 1 in 400 chance)
+                if t == "READY":
+                    user_id = d['user']['id']
+                    print(f"✅ {name} online.")
+
+                # --- SMART REJOIN LOGIC ---
+                if t == "VOICE_STATE_UPDATE":
+                    if d.get('user_id') == user_id:
+                        new_channel = d.get('channel_id')
+                        
+                        # REJECT KICK: If channel is None, rejoin home
+                        if new_channel is None:
+                            print(f"🚫 {name} was kicked. Rejoining {home_channel}...")
+                            time.sleep(1)
+                            ws.send(json.dumps(join_payload))
+                        
+                        # ACCEPT MOVE: If moved to a different ID, don't rejoin
+                        elif new_channel != home_channel:
+                            print(f"📍 {name} was moved. Staying in new VC.")
+
+                # Rare disconnect for Wavy Line (1 in 400 chance every 60s)
                 if time.time() - last_dice_roll > 60:
                     if random.randint(1, 400) == 77:
-                        print(f"📉 {name}: Brief disconnect triggered for Statbot wavy look.")
+                        print(f"📉 {name}: Rare disconnect for wavy look.")
                         break 
                     last_dice_roll = time.time()
 
                 if time.time() - last_heartbeat > 30:
                     ws.send(json.dumps({"op": 1, "d": data.get('s')}))
-                    # Re-send join payload occasionally to ensure bot stays in VC
-                    if random.random() > 0.5:
-                        ws.send(json.dumps(join_payload))
                     last_heartbeat = time.time()
 
             ws.close()
-            time.sleep(random.randint(400, 450)) # Offline for ~7 mins
+            time.sleep(random.randint(400, 450)) # Gap for wavy line
 
         except:
             time.sleep(20)
@@ -111,6 +126,6 @@ if __name__ == "__main__":
             threading.Thread(target=vc_locker, args=(data["token"], data["channel"], name, data["mobile"])).start()
             if data["spam"]:
                 threading.Thread(target=daily_spammer, daemon=True).start()
-            time.sleep(random.randint(10, 20))
+            time.sleep(random.randint(5, 15))
     while True: time.sleep(1)
         
