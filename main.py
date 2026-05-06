@@ -31,7 +31,7 @@ def daily_spammer():
     while True:
         try:
             requests.post(f"https://discord.com/api/v9/channels/{VC_ONE_ID}/messages",
-                          headers=header, json={"content": "daily"})
+                          headers=header, json={"content": ""})
             time.sleep(300) 
         except: time.sleep(10)
 
