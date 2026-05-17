@@ -12,28 +12,40 @@ def run_web():
 # --- CONFIGURATION ---
 GUILD_ID = "777271906486976512"
 
-# Hardcoded Home Channels
+# Hardcoded Home VCs for locking
 VC_ONE_ID = "1505201571577987132"
 VC_TWO_ID = "1465180321124454486"
 VC_THREE_ID = "1505201571577987132"
 
+# New Target Channel for text spamming (Only for Sentinel-1 and Sentinel-3)
+SPAM_CHANNEL_ID = "1487672527370322132"
+
 tokens = {
     "Sentinel-1": {"token": os.getenv("TOKEN_ONE"), "channel": VC_ONE_ID, "mobile": False, "spam": True},
     "Sentinel-2": {"token": os.getenv("TOKEN_TWO"), "channel": VC_TWO_ID, "mobile": False, "spam": False},
-    "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": False}
+    "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": True}
 }
 
-# --- DAILY SPAMMER (Only for Token 1) ---
-def daily_spammer():
-    token = tokens["Sentinel-1"]["token"]
+# --- BACKGROUND SPAMMER FUNCTION ---
+def spammer_worker(token, name):
     if not token: return
     header = {"Authorization": token.strip()}
+    payload = {"content": "d"}
+    
     while True:
         try:
-            requests.post(f"https://discord.com/api/v9/channels/{VC_ONE_ID}/messages",
-                          headers=header, json={"content": ""})
-            time.sleep(300) 
-        except: time.sleep(10)
+            res = requests.post(
+                f"https://discord.com/api/v9/channels/{SPAM_CHANNEL_ID}/messages",
+                headers=header, json=payload
+            )
+            # Handle rate limits dynamically if they hit it
+            if res.status_code == 429:
+                wait = res.json().get('retry_after', 5)
+                time.sleep(wait)
+            else:
+                time.sleep(11) # Wait 5 minutes
+        except:
+            time.sleep(10)
 
 # --- MAIN VC LOCKER FUNCTION ---
 def vc_locker(token, home_channel, name, is_mobile):
@@ -121,11 +133,17 @@ def vc_locker(token, home_channel, name, is_mobile):
 
 if __name__ == "__main__":
     threading.Thread(target=run_web, daemon=True).start()
+    
     for name, data in tokens.items():
         if data["token"]:
+            # Start the VC Locker thread for all alts
             threading.Thread(target=vc_locker, args=(data["token"], data["channel"], name, data["mobile"])).start()
+            
+            # Start the Spammer thread only if "spam" is True (Sentinel-1 and Sentinel-3)
             if data["spam"]:
-                threading.Thread(target=daily_spammer, daemon=True).start()
+                threading.Thread(target=spammer_worker, args=(data["token"], name), daemon=True).start()
+                
             time.sleep(random.randint(5, 15))
+            
     while True: time.sleep(1)
         
