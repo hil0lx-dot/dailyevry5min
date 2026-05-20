@@ -27,7 +27,7 @@ tokens = {
     "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": True}
 }
 
-# --- BACKGROUND SPAMMER FUNCTION (Only for 1 and 3 via __main__) ---
+# --- BACKGROUND SPAMMER FUNCTION ---
 def spammer_worker(token, name):
     if not token: return
     header = {"Authorization": token.strip()}
@@ -43,7 +43,7 @@ def spammer_worker(token, name):
                 wait = res.json().get('retry_after', 5)
                 time.sleep(wait)
             else:
-                time.sleep(11) # Your 11s background loop
+                time.sleep(10)
         except:
             time.sleep(10)
 
@@ -135,12 +135,17 @@ def vc_locker(token, home_channel, name, is_mobile):
                 t = data.get('t')
                 d = data.get('d')
 
+                # SAFE DELAY FIX: Let the handshake complete before slamming the voice channel payload
                 if op == 10:
+                    time.sleep(2) 
                     ws.send(json.dumps(join_payload))
 
                 if t == "READY":
                     user_id = d['user']['id']
                     print(f"✅ {name} online.")
+                    # Fallback backup join command once session state confirms active
+                    time.sleep(1)
+                    ws.send(json.dumps(join_payload))
 
                 # --- REMOTE CONTROL LISTENER ---
                 if t == "MESSAGE_CREATE":
@@ -149,12 +154,11 @@ def vc_locker(token, home_channel, name, is_mobile):
                     text_channel = d.get('channel_id')
                     msg_guild_id = d.get('guild_id')
 
-                    # If YOU type "daily", EVERY token (1, 2, and 3) replies with "d"
                     if msg_guild_id == GUILD_ID and author_id == MY_USER_ID:
                         if content == "daily":
                             send_chat_message(token, text_channel, "d")
 
-                # --- SAFE BUTTON DETECTION (Anti-Crash Check) ---
+                # --- SAFE BUTTON DETECTION ---
                 if t in ["MESSAGE_UPDATE", "MESSAGE_CREATE"]:
                     if d and d.get('guild_id') == GUILD_ID:
                         author = d.get('author', {})
@@ -169,17 +173,13 @@ def vc_locker(token, home_channel, name, is_mobile):
                     if d.get('user_id') == user_id:
                         new_channel = d.get('channel_id')
                         
-                        # REJECT KICK
                         if new_channel is None:
                             print(f"🚫 {name} was kicked. Rejoining {home_channel}...")
                             time.sleep(1)
                             ws.send(json.dumps(join_payload))
-                        
-                        # ACCEPT MOVE
                         elif new_channel != home_channel:
                             print(f"📍 {name} was moved. Staying in new VC.")
 
-                # Rare disconnect for Wavy Line (1 in 400 chance every 60s)
                 if time.time() - last_dice_roll > 60:
                     if random.randint(1, 400) == 77:
                         print(f"📉 {name}: Rare disconnect for wavy look.")
@@ -191,7 +191,7 @@ def vc_locker(token, home_channel, name, is_mobile):
                     last_heartbeat = time.time()
 
             ws.close()
-            time.sleep(random.randint(400, 450)) # Gap for wavy line
+            time.sleep(random.randint(400, 450))
 
         except:
             time.sleep(20)
@@ -201,14 +201,10 @@ if __name__ == "__main__":
     
     for name, data in tokens.items():
         if data["token"]:
-            # Start the VC Locker thread for all alts
             threading.Thread(target=vc_locker, args=(data["token"], data["channel"], name, data["mobile"])).start()
-            
-            # Background automated spam loop stays strictly for 1 and 3 as configured
             if data["spam"]:
                 threading.Thread(target=spammer_worker, args=(data["token"], name), daemon=True).start()
-                
             time.sleep(random.randint(5, 15))
             
     while True: time.sleep(1)
-        
+            
