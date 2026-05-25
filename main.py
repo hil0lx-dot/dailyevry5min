@@ -15,7 +15,7 @@ MY_USER_ID = "1404189983807639672"
 
 # Hardcoded Home VCs for locking
 VC_ONE_ID = "1489198958759903232"
-VC_TWO_ID = "1489190919671648316"
+VC_TWO_ID = "1487672527370322132"
 VC_THREE_ID = "1489198958759903232"
 
 # New Target Channel for background text spamming (Sentinel-1 and Sentinel-3)
