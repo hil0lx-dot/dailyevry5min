@@ -31,7 +31,7 @@ tokens = {
 def spammer_worker(token, name):
     if not token: return
     header = {"Authorization": token.strip()}
-    payload = {"content": ""}
+    payload = {"content": "bro fr my goat is 1pr4 ;-;"}
     
     while True:
         try:
