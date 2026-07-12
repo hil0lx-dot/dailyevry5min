@@ -19,7 +19,7 @@ STATUS = "invisible"
 
 # Hardcoded Home VCs for locking (Updated: 1 and 3 match)
 VC_ONE_ID = "1488606312563736646"
-VC_TWO_ID = "1465180321124454486"
+VC_TWO_ID = "1488606312563736646"
 VC_THREE_ID = "1488606312563736646"
 
 # Target Channel for background text spamming (Sentinel-1 and Sentinel-3)
