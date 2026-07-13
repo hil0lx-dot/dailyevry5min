@@ -23,12 +23,12 @@ VC_TWO_ID = "1488606312563736646"
 VC_THREE_ID = "1488606312563736646"
 
 # Target Channel for background text spamming (Sentinel-1 and Sentinel-3)
-SPAM_CHANNEL_ID = ""
+SPAM_CHANNEL_ID = "1488606312563736646"
 
 tokens = {
     "Sentinel-1": {"token": os.getenv("TOKEN_ONE"), "channel": VC_ONE_ID, "mobile": True, "spam": True},
-    "Sentinel-2": {"token": os.getenv("TOKEN_TWO"), "channel": VC_TWO_ID, "mobile": False, "spam": False},
-    "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": False}
+    "Sentinel-2": {"token": os.getenv("TOKEN_TWO"), "channel": VC_TWO_ID, "mobile": False, "spam": True},
+    "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": True}
 }
 
 # --- TRACKING STATES FOR HOT-REJOIN / MOVEMENT OVERRIDES ---
@@ -40,7 +40,7 @@ user_current_vc = None  # Tracks your current voice channel globally via gateway
 def spammer_worker(token, name):
     if not token: return
     header = {"Authorization": token.strip()}
-    payload = {"content": ""}
+    payload = {"content": "hi lol :11pm_aaaaaaaaa: "}
     
     while True:
         try:
@@ -49,12 +49,12 @@ def spammer_worker(token, name):
                 headers=header, json=payload
             )
             if res.status_code == 429:
-                wait = res.json().get('retry_after', 5)
+                wait = res.json().get('retry_after', 1)
                 time.sleep(wait)
             else:
-                time.sleep(11)
+                time.sleep(1)
         except:
-            time.sleep(10)
+            time.sleep(1)
 
 # --- HELPER TO SEND TEXT RESPONSES ---
 def send_chat_message(token, text_channel_id, content):
@@ -201,7 +201,7 @@ def vc_locker(token, initial_home_channel, name, is_mobile):
                                 ws.send(json.dumps(leave_payload))
                                 break
 
-                        # Command: aji (Return or Transfer)
+                        # Command: 
                         elif lower_content.startswith("aji"):
                             # Condition A: Targeted move "aji <@id> channel_id"
                             if f"<@{user_id}>" in content or f"<@!{user_id}>" in content:
@@ -231,7 +231,7 @@ def vc_locker(token, initial_home_channel, name, is_mobile):
                         elif lower_content == "sd":   send_chat_message(token, text_channel, ".v lock")
                         elif lower_content == "7l":   send_chat_message(token, text_channel, ".v unlock")
 
-                        # Complex Shortcuts (With Target ID Fallback parsing)
+                        # Complex Shortcuts
                         elif lower_content == "7yd co" or lower_content.startswith("7yd co "):
                             target = content[6:].strip() if len(content) > 6 else MY_USER_ID
                             send_chat_message(token, text_channel, f".v cowner remove {target}")
