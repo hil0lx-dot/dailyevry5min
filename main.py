@@ -40,7 +40,7 @@ user_current_vc = None  # Tracks your current voice channel globally via gateway
 def spammer_worker(token, name):
     if not token: return
     header = {"Authorization": token.strip()}
-    payload = {"content": "hi lol <:11pm_aaaaaaaaa:1062102316423073893> "}
+    payload = {"content": "slm lol <:11pm_aaaaaaaaa:1062102316423073893> "}
     
     while True:
         try:
