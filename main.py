@@ -22,11 +22,11 @@ VC_ONE_ID = "1488606312563736646"
 VC_TWO_ID = "1488606312563736646"
 VC_THREE_ID = "1488606312563736646"
 
-# Target Channel for background text spamming (Sentinel-1 and Sentinel-3)
+# Target Channel for background text spamming (Sentinel- and Sentinel-3)
 SPAM_CHANNEL_ID = "1488606312563736646"
 
 tokens = {
-    "Sentinel-1": {"token": os.getenv("TOKEN_ONE"), "channel": VC_ONE_ID, "mobile": True, "spam": True},
+    "Sentinel-1": {"token": os.getenv("TOKEN_ONE"), "channel": VC_ONE_ID, "mobile": True, "spam": False},
     "Sentinel-2": {"token": os.getenv("TOKEN_TWO"), "channel": VC_TWO_ID, "mobile": False, "spam": False},
     "Sentinel-3": {"token": os.getenv("TOKEN_THREE"), "channel": VC_THREE_ID, "mobile": True, "spam": False}
 }
