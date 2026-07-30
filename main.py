@@ -18,8 +18,8 @@ MY_USER_ID = "1404189983807639672"
 STATUS = "invisible" 
 
 # Hardcoded Home VCs for locking (Updated: 1 and 3 match)
-VC_ONE_ID = "1488606312563736646"
-VC_TWO_ID = "1488606312563736646"
+VC_ONE_ID = "1489193076198080603"
+VC_TWO_ID = "1489193076198080603"
 VC_THREE_ID = "1488606312563736646"
 
 # Target Channel for background text spamming (Sentinel- and Sentinel-3)
